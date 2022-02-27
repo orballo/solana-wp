@@ -1,0 +1,8 @@
+{
+  "name": "solana-wp",
+  "version": "0.1.0",
+  "devDependencies": {
+    "@swc/cli": "^0.1.55",
+    "@swc/core": "^1.2.146"
+  }
+}
