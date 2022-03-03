@@ -1,8 +1,22 @@
 {
   "name": "solana-wp",
   "version": "0.1.0",
+  "scripts": {
+    "watch": "esbuild src/login.tsx --bundle --outdir=build --watch"
+  },
+  "dependencies": {
+    "@solana/wallet-adapter-base": "^0.9.3",
+    "@solana/wallet-adapter-react": "^0.15.3",
+    "@solana/wallet-adapter-react-ui": "^0.9.5",
+    "@solana/wallet-adapter-wallets": "^0.15.4",
+    "@solana/web3.js": "^1.35.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
   "devDependencies": {
-    "@swc/cli": "^0.1.55",
-    "@swc/core": "^1.2.146"
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
+    "esbuild": "^0.14.23",
+    "typescript": "^4.5.5"
   }
 }

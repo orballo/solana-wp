@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "stream": [
+                "./node_modules/readable-stream"
+            ]
+        },
+        "esModuleInterop": true,
+        "jsx": "react"
+    },
+}
