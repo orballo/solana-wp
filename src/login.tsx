@@ -35,6 +35,7 @@ const Login: React.FC = () => {
 
     await fetch("/wp-json/solana-wp/v1/sign-in", {
       method: "POST",
+      credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
       },

@@ -18,16 +18,29 @@ require_once 'vendor/autoload.php';
 
 use Tuupola\Base58;
 
+
+// Util to log to error.log file.
+
 function consolelog($content)
 {
     error_log(print_r($content, true));
 }
+
+
+
+// Load plugin scripts and styles for UI.
 
 function load_solana_login()
 {
     wp_enqueue_script('solana-login', plugins_url('/build/login.js', __FILE__));
     wp_enqueue_style('solana-login', plugins_url('/build/login.css', __FILE__));
 }
+
+add_action('login_enqueue_scripts', 'load_solana_login');
+
+
+
+// Load plugin endpoints.
 
 function solana_endpoint_sign_in($request)
 {
@@ -42,6 +55,19 @@ function solana_endpoint_sign_in($request)
     $signature_decoded = pack('C*', ...$signature);
 
     $verified = sodium_crypto_sign_verify_detached($signature_decoded, $message, $public_key_decoded);
+
+    if ($verified) {
+        $user = get_users(array(
+            'meta_key' => 'solana_address',
+            'meta_value' => $public_key
+        ));
+
+        if (!is_user_logged_in()) {
+            wp_set_auth_cookie($user['ID'], true, true);
+        }
+    } else {
+        return new WP_REST_Response(null, 401);
+    }
 }
 
 function load_solana_endpoints()
@@ -52,5 +78,16 @@ function load_solana_endpoints()
     ));
 }
 
-add_action('login_enqueue_scripts', 'load_solana_login');
 add_action('rest_api_init', 'load_solana_endpoints');
+
+
+// Add metaboxes to user for Solana address.
+
+function add_solana_address_to_user($methods)
+{
+    $methods['solana_address'] = "Solana Address";
+
+    return $methods;
+}
+
+add_filter('user_contactmethods', 'add_solana_address_to_user');
