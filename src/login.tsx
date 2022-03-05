@@ -26,14 +26,23 @@ const Login: React.FC = () => {
   };
 
   const handleSignIn = async () => {
-    const message = `Sign In to Wordpress with Solana`;
+    const message = "Wordpress Authentication";
     const encodedMessage = new TextEncoder().encode(message);
     const signedMessage = await (window as any).solana.signMessage(
       encodedMessage,
       "utf8"
     );
 
-    const { publicKey, signature } = signedMessage;
+    await fetch("/wp-json/solana-wp/v1/sign-in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        signature: signedMessage.signature,
+        publicKey: signedMessage.publicKey,
+      }),
+    });
   };
 
   return !wallet ? (

@@ -14,20 +14,13 @@
  * Domain Path:       /languages
  */
 
+require_once 'vendor/autoload.php';
+
+use Tuupola\Base58;
+
 function consolelog($content)
 {
     error_log(print_r($content, true));
-}
-
-function filter_out_scripts_and_styles_in_login($todo)
-{
-    global $pagenow;
-
-    if ($pagenow === 'wp-login.php') {
-        return ['solana-login'];
-    }
-
-    return $todo;
 }
 
 function load_solana_login()
@@ -36,19 +29,28 @@ function load_solana_login()
     wp_enqueue_style('solana-login', plugins_url('/build/login.css', __FILE__));
 }
 
-function remove_body_class()
+function solana_endpoint_sign_in($request)
 {
-    return [];
+    $message = 'Wordpress Authentication';
+    $body = json_decode($request->get_body());
+    $public_key = $body->publicKey;
+    $signature = $body->signature->data;
+
+    $base58 = new Base58(["characters" => Base58::BITCOIN]);
+
+    $public_key_decoded = $base58->decode($public_key);
+    $signature_decoded = pack('C*', ...$signature);
+
+    $verified = sodium_crypto_sign_verify_detached($signature_decoded, $message, $public_key_decoded);
+}
+
+function load_solana_endpoints()
+{
+    register_rest_route('solana-wp/v1', '/sign-in', array(
+        'methods' => WP_REST_Server::EDITABLE,
+        'callback' => 'solana_endpoint_sign_in'
+    ));
 }
 
 add_action('login_enqueue_scripts', 'load_solana_login');
-// add_filter('print_styles_array', 'filter_out_scripts_and_styles_in_login');
-// add_filter('print_scripts_array', 'filter_out_scripts_and_styles_in_login');
-// add_filter('login_body_class', 'remove_body_class');
-
-// add_filter('pre_http_request', function ($preempt, $parsed_args, $url) {
-//     consolelog($preempt);
-//     consolelog($parsed_args);
-//     consolelog($url);
-//     return $preempt;
-// });
+add_action('rest_api_init', 'load_solana_endpoints');
