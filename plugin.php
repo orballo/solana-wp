@@ -57,17 +57,23 @@ function solana_endpoint_sign_in($request)
     $verified = sodium_crypto_sign_verify_detached($signature_decoded, $message, $public_key_decoded);
 
     if ($verified) {
-        $user = get_users(array(
+        $user = reset(get_users(array(
             'meta_key' => 'solana_address',
-            'meta_value' => $public_key
-        ));
+            'meta_value' => $public_key,
+            'number' => 1
+        )));
 
-        if (!is_user_logged_in()) {
-            wp_set_auth_cookie($user['ID'], true, true);
+        if (!is_wp_error($user)) {
+            wp_set_current_user($user->ID);
+            wp_set_auth_cookie($user->ID, true, true);
+
+            return new WP_REST_Response(null, 302, array(
+                'location' => admin_url()
+            ));
         }
-    } else {
-        return new WP_REST_Response(null, 401);
     }
+
+    return new WP_REST_Response(null, 401);
 }
 
 function load_solana_endpoints()

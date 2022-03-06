@@ -35,15 +35,19 @@ const Login: React.FC = () => {
 
     await fetch("/wp-json/solana-wp/v1/sign-in", {
       method: "POST",
-      credentials: "same-origin",
+      credentials: "include",
+      redirect: "follow",
       headers: {
         "Content-Type": "application/json",
+        "Upgrade-Insecure-Request": "1",
       },
       body: JSON.stringify({
         signature: signedMessage.signature,
         publicKey: signedMessage.publicKey,
       }),
     });
+
+    window.location.replace("/wp-admin");
   };
 
   return !wallet ? (
